@@ -45,4 +45,8 @@ public class MoviesServer {
         server.stop(STOP_DELAY);
         System.out.println("Сервер остановлен");
     }
+
+    public void removeAllMovies() {
+        moviesStore.clear();
+    }
 }

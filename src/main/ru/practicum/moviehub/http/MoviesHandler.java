@@ -19,6 +19,9 @@ public class MoviesHandler extends BaseHttpHandler {
         if (method.equalsIgnoreCase("GET")) {
             // Напишите реализацию с использованием метода sendJson
             sendJson(ex, 200, "[]");
+        } else {
+            sendError(ex, 500, "No handler", "It's not handled at all");
+
         }
     }
 }

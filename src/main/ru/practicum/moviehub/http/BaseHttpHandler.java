@@ -33,7 +33,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
     protected void sendMethodNotAllowed(HttpExchange ex) throws java.io.IOException {
         // общий для всех хендлеров метод
         // для отправки ответа без тела и кодом 405
-        ex.getResponseHeaders().set("Content-Type", CT_JSON);
+        // TODO ? ex.getResponseHeaders().set("Content-Type", CT_JSON);
 
         // Сервер ОБЯЗАН сгенерировать поле заголовка Allow в ответе с кодом 405,
         // которое содержит список текущих доступных методов ресурса.
@@ -41,5 +41,14 @@ public abstract class BaseHttpHandler implements HttpHandler {
 
         // TODO ошибки возвращают объект с полем `error` (и при необходимости `details`)
         ex.sendResponseHeaders(405, -1);
+    }
+
+    protected void sendError(HttpExchange ex, Integer code, String error, String details) throws java.io.IOException {
+        // общий для всех хендлеров метод
+        // ошибки возвращают объект с полем `error` (и при необходимости `details`)
+        ex.getResponseHeaders().set("Content-Type", CT_JSON);
+
+        // TODO ошибки возвращают объект с полем `error` (и при необходимости `details`)
+        ex.sendResponseHeaders(code, -1);
     }
 }
