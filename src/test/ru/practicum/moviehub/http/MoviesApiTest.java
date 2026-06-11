@@ -4,10 +4,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.practicum.moviehub.MovieHubApp;
 import ru.practicum.moviehub.store.MoviesStore;
 
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -51,23 +51,51 @@ public class MoviesApiTest {
     // Get movies collection
     @Test
     void getMovies_whenEmpty_returnsEmptyArray() throws Exception {
+        HttpResponse<String> resp = getResponseForGetRequest("/movies");
+
+
+        assertEquals(200, resp.statusCode(), "GET /movies должен вернуть 200");
+
+        checkContentTypeHeader(resp);
+
+        String body = resp.body().trim();
+        assertTrue(body.startsWith("[") && body.endsWith("]"),
+                "Ожидается JSON-массив");
+    }
+
+    @Test
+    void HeadMovies_returnMethodNotAllowed() throws Exception {
+        // .
         HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(SERVER_BASE_URL + "/movies")) // !!! Добавьте правильный URI
-                .GET()
+                .uri(URI.create(SERVER_BASE_URL + "/movies"))
+                .HEAD()
                 .build();
 
         HttpResponse<String> resp =
                 client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-        assertEquals(200, resp.statusCode(), "GET /movies должен вернуть 200");
+        assertEquals(405, resp.statusCode(), "При неподдерживаемом HTTP-методе " +
+                "возвращается `405 Method Not Allowed`");
 
+        // TODO Check: Сервер ОБЯЗАН сгенерировать поле заголовка Allow в ответе с кодом 405
+
+    }
+
+    private static HttpResponse<String> getResponseForGetRequest(String s) throws IOException, InterruptedException {
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(SERVER_BASE_URL + s))
+                .GET()
+                .build();
+
+        HttpResponse<String> resp =
+                client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        return resp;
+    }
+
+    private static void checkContentTypeHeader(HttpResponse<String> resp) {
         String contentTypeHeaderValue =
                 resp.headers().firstValue("Content-Type").orElse("");
         assertEquals("application/json; charset=UTF-8", contentTypeHeaderValue,
                 "Content-Type должен содержать формат данных и кодировку");
-
-        String body = resp.body().trim();
-        assertTrue(body.startsWith("[") && body.endsWith("]"),
-                "Ожидается JSON-массив");
     }
 }
