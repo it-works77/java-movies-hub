@@ -70,11 +70,6 @@ public class MoviesApiDeleteMoviesTest {
 
         Optional<Movie> movie = store.getMovie(1);
         assertTrue(movie.isEmpty());
-
-        String body = resp.body().trim();
-        assertEquals("""
-                        [{"error":"Ошибка валидации запроса","year":"Неверный Json"}]""", body,
-                "Ожидается описание ошибки");
     }
 
     // возвращает ошибку, если фильм не найден;
@@ -86,11 +81,10 @@ public class MoviesApiDeleteMoviesTest {
         assertEquals(404, resp.statusCode(), "DELETE /movies/{id} " +
                 "возвращает ошибку, если фильм не найден");
 
-        /* Если фильм не найден:
-        Код статуса — 404 Not Found.
-        Тело ответа — сообщение об ошибке, например, Фильм не найден.
-        */
-        // TODO Implement body check
+        String body = resp.body().trim();
+        assertEquals("""
+                        {"error":"Некорректный ID","details":"Фильм не найден"}""", body,
+                "Ожидается описание ошибки");
     }
 
     // возвращает ошибку, если `id` не число.
@@ -102,13 +96,9 @@ public class MoviesApiDeleteMoviesTest {
         assertEquals(400, resp.statusCode(), "DELETE /movies/{id} " +
                 "возвращает ошибку, если фильм не найден");
 
-        /* Если ID, указанный в пути запроса, не число:
-            Код статуса — 400 Bad Request.
-            Тело ответа — сообщение об ошибке, например, Некорректный ID.
-        */
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Некорректный ID","year":"ID, указанный в пути запроса, не число"}]""", body,
+                        {"error":"Некорректный ID","details":"ID, указанный в пути запроса, не число"}""", body,
                 "Ожидается описание ошибки");
     }
 

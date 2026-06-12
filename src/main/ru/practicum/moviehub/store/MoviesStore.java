@@ -1,6 +1,7 @@
 package ru.practicum.moviehub.store;
 
 import ru.practicum.moviehub.exception.MovieException;
+import ru.practicum.moviehub.exception.MovieStoreNoSuchMovieException;
 import ru.practicum.moviehub.model.Movie;
 
 import java.util.HashMap;
@@ -25,8 +26,12 @@ public class MoviesStore {
         return Optional.ofNullable(store.get(id));
     }
 
-    public void clear() {
-        store.clear();
+    public void removeMovie(int id) throws MovieStoreNoSuchMovieException {
+        if (store.containsKey(id)) {
+            store.remove(id);
+        } else {
+            throw new MovieStoreNoSuchMovieException("Нет фильма с идентификатором %d".formatted(id));
+        }
     }
 
     private Integer getId() {
@@ -34,5 +39,9 @@ public class MoviesStore {
                 .max(Integer::compareTo);
 
         return currentMaxId.map(id -> id + 1).orElse(1);
+    }
+
+    public void clear() {
+        store.clear();
     }
 }

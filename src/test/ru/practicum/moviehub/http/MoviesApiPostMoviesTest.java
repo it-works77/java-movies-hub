@@ -88,7 +88,7 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Неверный title","year":"Пустой заголовок"}]""", body,
+                        {"error":"Неверный title","year":"Пустой заголовок"}""", body,
                 "Ожидается описание ошибки");
     }
 
@@ -107,7 +107,7 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Неверный title","year":"title > 100 символов"}]""", body,
+                        {"error":"Неверный title","year":"title > 100 символов"}""", body,
                 "Ожидается описание ошибки");
     }
 
@@ -126,7 +126,7 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Неверный year","year":"Год меньше 1888"}]""", body,
+                        {"error":"Неверный year","year":"Год меньше 1888"}""", body,
                 "Ожидается описание ошибки");
     }
 
@@ -144,7 +144,7 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Неверный year","year":"больше текущего года + 1"}]""", body,
+                        {"error":"Неверный year","year":"больше текущего года + 1"}""", body,
                 "Ожидается описание ошибки");
     }
 
@@ -163,7 +163,7 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Ошибка валидации запроса","year":"Неверный Json"}]""", body,
+                        {"error":"Ошибка валидации запроса","year":"Неверный Json"}""", body,
                 "Ожидается описание ошибки");
     }
 

@@ -119,7 +119,7 @@ public class MoviesApiGetMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Некорректный ID","year":"ID, указанный в пути запроса, не число"}]""", body,
+                        {"error":"Некорректный ID","details":"ID, указанный в пути запроса, не число"}""", body,
                 "Ожидается описание ошибки");
     }
 
@@ -132,7 +132,7 @@ public class MoviesApiGetMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"error":"Некорректный ID","year":"Такого фильма нет"}]""", body,
+                        {"error":"Некорректный ID","details":"Фильм не найден"}""", body,
                 "Ожидается описание ошибки");
     }
 
