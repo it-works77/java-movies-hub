@@ -43,7 +43,7 @@ public class MoviesApiPostMoviesTest {
 
     @BeforeEach
     void beforeEach() {
-
+        store.clear();
     }
 
     @AfterAll
@@ -78,14 +78,18 @@ public class MoviesApiPostMoviesTest {
     @Test
     void postMovie_whenEmptyTitle_returnsError() throws Exception {
         String movieJsonString = """
-                {"title": "", "year": 2000}
+                {"title":"","year":2000}
                 """;
 
         HttpResponse<String> resp = getResponseForPostMovieJsonRequest(ROUTE, movieJsonString);
 
         checkResponseContentTypeHeader(resp);
         assertEquals(422, resp.statusCode(), "POST /movies возвращает ошибку 422 при пустом `title`");
-        // TODO Implement body error check
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Неверный title","year":"Пустой заголовок"}]""", body,
+                "Ожидается описание ошибки");
     }
 
     // - возвращает ошибку при слишком длинном `title` (> 100 символов);
@@ -100,7 +104,11 @@ public class MoviesApiPostMoviesTest {
         checkResponseContentTypeHeader(resp);
         assertEquals(422, resp.statusCode(), "POST /movies возвращает ошибку 422 " +
                 "при слишком длинном `title` (> 100 символов)`");
-        // TODO Implement body error check
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Неверный title","year":"title > 100 символов"}]""", body,
+                "Ожидается описание ошибки");
     }
 
     //  - возвращает ошибку при неверном `year` (меньше 1888 или больше текущего года + 1);
@@ -115,7 +123,11 @@ public class MoviesApiPostMoviesTest {
         checkResponseContentTypeHeader(resp);
         assertEquals(422, resp.statusCode(), "POST /movies возвращает ошибку 422 " +
                 "при при неверном `year` (меньше 1888)");
-        // TODO Implement body error check
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Неверный year","year":"Год меньше 1888"}]""", body,
+                "Ожидается описание ошибки");
     }
 
     @Test
@@ -129,7 +141,11 @@ public class MoviesApiPostMoviesTest {
         checkResponseContentTypeHeader(resp);
         assertEquals(422, resp.statusCode(), "POST /movies возвращает ошибку 422 " +
                 "при при неверном `year` (больше текущего года + 1)");
-        // TODO Implement body error check
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Неверный year","year":"больше текущего года + 1"}]""", body,
+                "Ожидается описание ошибки");
     }
 
     // - возвращает ошибку при некорректном JSON.
@@ -144,9 +160,12 @@ public class MoviesApiPostMoviesTest {
         checkResponseContentTypeHeader(resp);
         assertEquals(422, resp.statusCode(), "POST /movies возвращает ошибку 422 " +
                 "при некорректном JSON.");
-        // TODO Implement body error check
-    }
 
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Ошибка валидации запроса","year":"Неверный Json"}]""", body,
+                "Ожидается описание ошибки");
+    }
 
     private static HttpResponse<String> getResponseForPostMovieRequest(String route,
                                                                        String movieTitle,
@@ -166,9 +185,8 @@ public class MoviesApiPostMoviesTest {
         return client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
     }
 
-
     private static HttpResponse<String> getResponseForPostMovieJsonRequest(String route,
-                                                                       String movieJsonString)
+                                                                           String movieJsonString)
             throws IOException, InterruptedException, MovieException {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(SERVER_BASE_URL + route))

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
 
 import java.io.IOException;
@@ -13,10 +14,12 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.moviehub.MovieHubApp.SERVER_BASE_URL;
+import static ru.practicum.moviehub.http.MoviesServer.MOVIES_CONTEXT;
 
 public class MoviesApiDeleteMoviesTest {
     private static MoviesServer server;
@@ -24,6 +27,7 @@ public class MoviesApiDeleteMoviesTest {
     private static MoviesStore store;
 
     private static final int CONNECTION_TIMEOUT = 5;
+    private static final String ROUTE = MOVIES_CONTEXT;
 
     @BeforeAll
     static void beforeAll() {
@@ -37,7 +41,7 @@ public class MoviesApiDeleteMoviesTest {
 
     @BeforeEach
     void beforeEach() {
-
+        store.clear();
     }
 
     @AfterAll
@@ -53,13 +57,65 @@ public class MoviesApiDeleteMoviesTest {
      *  - возвращает ошибку, если `id` не число.
      */
 
+    // удаляет фильм по существующему `id`;
+    @Test
+    void deleteMovie_returnsSuccess() throws Exception {
+        store.putMovie(new Movie("a", 2000));
 
+        HttpResponse<String> resp = getResponseForDeleteRequest(ROUTE + "/1");
 
+        checkResponseContentTypeHeader(resp);
+        assertEquals(204, resp.statusCode(), "DELETE /movies/{id} " +
+                "удаляет фильм по существующему `id`");
+
+        Optional<Movie> movie = store.getMovie(1);
+        assertTrue(movie.isEmpty());
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Ошибка валидации запроса","year":"Неверный Json"}]""", body,
+                "Ожидается описание ошибки");
+    }
+
+    // возвращает ошибку, если фильм не найден;
+    @Test
+    void deleteMovie_whenWrongId_returnsError() throws Exception {
+        HttpResponse<String> resp = getResponseForDeleteRequest(ROUTE + "/9999");
+
+        checkResponseContentTypeHeader(resp);
+        assertEquals(404, resp.statusCode(), "DELETE /movies/{id} " +
+                "возвращает ошибку, если фильм не найден");
+
+        /* Если фильм не найден:
+        Код статуса — 404 Not Found.
+        Тело ответа — сообщение об ошибке, например, Фильм не найден.
+        */
+        // TODO Implement body check
+    }
+
+    // возвращает ошибку, если `id` не число.
+    @Test
+    void deleteMovie_whenIdNotNumber_returnsError() throws Exception {
+        HttpResponse<String> resp = getResponseForDeleteRequest(ROUTE + "/asdf");
+
+        checkResponseContentTypeHeader(resp);
+        assertEquals(400, resp.statusCode(), "DELETE /movies/{id} " +
+                "возвращает ошибку, если фильм не найден");
+
+        /* Если ID, указанный в пути запроса, не число:
+            Код статуса — 400 Bad Request.
+            Тело ответа — сообщение об ошибке, например, Некорректный ID.
+        */
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Некорректный ID","year":"ID, указанный в пути запроса, не число"}]""", body,
+                "Ожидается описание ошибки");
+    }
 
     private static HttpResponse<String> getResponseForDeleteRequest(String s) throws IOException, InterruptedException {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(SERVER_BASE_URL + s))
-                .GET()
+                .DELETE()
                 .build();
 
         return client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));

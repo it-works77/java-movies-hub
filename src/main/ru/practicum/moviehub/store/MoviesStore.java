@@ -18,7 +18,7 @@ public class MoviesStore {
     }
 
     public void putMovie(String title, Integer year) throws MovieException {
-        store.put(getId(), new Movie(title, year));
+        putMovie(new Movie(title, year));
     }
 
     public Optional<Movie> getMovie(Integer id) {
@@ -33,6 +33,6 @@ public class MoviesStore {
         Optional<Integer> currentMaxId = store.keySet().stream()
                 .max(Integer::compareTo);
 
-        return currentMaxId.map(integer -> integer + 1).orElse(1);
+        return currentMaxId.map(id -> id + 1).orElse(1);
     }
 }

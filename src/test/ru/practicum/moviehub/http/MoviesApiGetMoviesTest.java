@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
 
 
@@ -18,6 +19,7 @@ import java.time.Duration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.moviehub.MovieHubApp.SERVER_BASE_URL;
+import static ru.practicum.moviehub.http.MoviesServer.MOVIES_CONTEXT;
 
 public class MoviesApiGetMoviesTest {
     private static MoviesServer server;
@@ -25,6 +27,7 @@ public class MoviesApiGetMoviesTest {
     private static MoviesStore store;
 
     private static final int CONNECTION_TIMEOUT = 5;
+    private static final String ROUTE = MOVIES_CONTEXT;
 
     @BeforeAll
     static void beforeAll() {
@@ -38,7 +41,7 @@ public class MoviesApiGetMoviesTest {
 
     @BeforeEach
     void beforeEach() {
-
+        store.clear();
     }
 
     @AfterAll
@@ -50,9 +53,9 @@ public class MoviesApiGetMoviesTest {
     //
 
     /*  Get movies
-    *   - возвращает пустой список, если нет фильмов;
-    *   - возвращает список с ранее добавленными фильмами.
-    */
+     *   - возвращает пустой список, если нет фильмов;
+     *   - возвращает список с ранее добавленными фильмами.
+     */
     @Test
     void getMovies_whenEmpty_returnsEmptyArray() throws Exception {
 
@@ -67,19 +70,20 @@ public class MoviesApiGetMoviesTest {
     }
 
     @Test
-    void getMovies_whenEmpty_returnsAddedMovies() throws Exception {
+    void getMovies_whenHaveMovies_returnsAddedMovies() throws Exception {
 
-        // TODO добавить фильмы
+        store.putMovie(new Movie("a", 2000));
+        store.putMovie(new Movie("b", 2001));
 
         HttpResponse<String> resp = getResponseForGetRequest("/movies");
 
         checkResponseContentTypeHeader(resp);
         assertEquals(200, resp.statusCode(), "GET /movies должен вернуть 200");
 
-        // TODO Fix Проверить, что вернулись
         String body = resp.body().trim();
-        assertTrue(body.startsWith("[") && body.endsWith("]"),
-                "Ожидается JSON-массив");
+        assertEquals("""
+                        [{"id":1,"title":"a","year":2000},{"id":2,"title":"b","year":2001}]""", body,
+                "Ожидается массив из двух фильмов");
     }
 
     /* GET /movies/{id}
@@ -90,30 +94,46 @@ public class MoviesApiGetMoviesTest {
 
     @Test
     void getMovies_whenIdExists_returnsMovie() throws Exception {
+        store.putMovie(new Movie("a", 2000));
 
         HttpResponse<String> resp = getResponseForGetRequest("/movies/1");
 
         checkResponseContentTypeHeader(resp);
         assertEquals(200, resp.statusCode(), "GET /movies/{id} должен вернуть 200");
 
-        // TODO Implement body check
         String body = resp.body().trim();
-        assertTrue(body.startsWith("[") && body.endsWith("]"),
-                "Ожидается JSON-массив");
+        assertEquals("""
+                        [{"id":1,"title":"a","year":2000}]""", body,
+                "Ожидается массив из одного фильма");
+
+        // TODO Implement body check
+    }
+
+    @Test
+    void getMovie_whenIdNotNumber_returnsError() throws Exception {
+        HttpResponse<String> resp = getResponseForGetRequest(ROUTE + "/asdf");
+
+        checkResponseContentTypeHeader(resp);
+        assertEquals(400, resp.statusCode(), "DELETE /movies/{id} " +
+                "возвращает ошибку, если фильм не найден");
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"error":"Некорректный ID","year":"ID, указанный в пути запроса, не число"}]""", body,
+                "Ожидается описание ошибки");
     }
 
     @Test
     void getMovies_whenNotExists_returnsNotFound() throws Exception {
-
         HttpResponse<String> resp = getResponseForGetRequest("/movies/999999999");
 
         checkResponseContentTypeHeader(resp);
         assertEquals(404, resp.statusCode(), "GET /movies/{id} должен вернуть 404 для неверного id");
 
-        // TODO Implement body check
         String body = resp.body().trim();
-        assertTrue(body.startsWith("[") && body.endsWith("]"),
-                "Ожидается JSON-массив");
+        assertEquals("""
+                        [{"error":"Некорректный ID","year":"Такого фильма нет"}]""", body,
+                "Ожидается описание ошибки");
     }
 
     /* GET /movies?year=YYYY
