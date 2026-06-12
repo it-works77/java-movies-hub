@@ -25,7 +25,6 @@ public class MoviesServer {
         try {
 
             server = HttpServer.create(new InetSocketAddress(new URI(serverBaseUrl).getPort()), 0);
-            // контексты
             server.createContext(MOVIES_CONTEXT, new MoviesHandler());
 
         } catch (IOException ex) {
@@ -44,9 +43,5 @@ public class MoviesServer {
     public void stop() {
         server.stop(STOP_DELAY);
         System.out.println("Сервер остановлен");
-    }
-
-    public void removeAllMovies() {
-        moviesStore.clear();
     }
 }

@@ -1,7 +1,9 @@
 package ru.practicum.moviehub.http;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import ru.practicum.moviehub.dto.response.ErrorResponse;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,22 +35,42 @@ public abstract class BaseHttpHandler implements HttpHandler {
     protected void sendMethodNotAllowed(HttpExchange ex) throws java.io.IOException {
         // общий для всех хендлеров метод
         // для отправки ответа без тела и кодом 405
-        // TODO ? ex.getResponseHeaders().set("Content-Type", CT_JSON);
 
         // Сервер ОБЯЗАН сгенерировать поле заголовка Allow в ответе с кодом 405,
         // которое содержит список текущих доступных методов ресурса.
         ex.getResponseHeaders().set("Allow", String.join(", ", MoviesServer.ALLOWED_METHODS));
 
-        // TODO ошибки возвращают объект с полем `error` (и при необходимости `details`)
-        ex.sendResponseHeaders(405, -1);
+        ex.getResponseHeaders().set("Content-Type", CT_JSON);
+        ex.sendResponseHeaders(405, 0);
+
+        ErrorResponse errorResponse = new ErrorResponse("Method Not Allowed",
+                "Неподдерживаемый HTTP метод");
+        Gson gson = new Gson();
+        String errorResponseString = gson.toJson(errorResponse);
+
+        try (OutputStream os = ex.getResponseBody()) {
+            os.write(errorResponseString.getBytes());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     protected void sendError(HttpExchange ex, Integer code, String error, String details) throws java.io.IOException {
         // общий для всех хендлеров метод
         // ошибки возвращают объект с полем `error` (и при необходимости `details`)
         ex.getResponseHeaders().set("Content-Type", CT_JSON);
+        ex.sendResponseHeaders(code, 0);
 
-        // TODO ошибки возвращают объект с полем `error` (и при необходимости `details`)
-        ex.sendResponseHeaders(code, -1);
+        ErrorResponse errorResponse = new ErrorResponse(error, details);
+        Gson gson = new Gson();
+        String errorResponseString = gson.toJson(errorResponse);
+
+        try (OutputStream os = ex.getResponseBody()) {
+            os.write(errorResponseString.getBytes());
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
     }
 }

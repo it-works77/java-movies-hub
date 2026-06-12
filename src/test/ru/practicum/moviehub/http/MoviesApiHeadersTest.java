@@ -55,10 +55,11 @@ public class MoviesApiHeadersTest {
      *   - при неподдерживаемом HTTP-методе возвращается `405 Method Not Allowed`..
      */
     @Test
-     void HeadMovies_returnMethodNotAllowed() throws Exception {
+     void putMovies_returnMethodNotAllowed() throws Exception {
+        String testString = "Test";
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(SERVER_BASE_URL + "/movies"))
-                .HEAD()
+                .PUT(HttpRequest.BodyPublishers.ofString(testString))
                 .build();
 
         HttpResponse<String> resp =
@@ -67,8 +68,10 @@ public class MoviesApiHeadersTest {
         assertEquals(405, resp.statusCode(), "При неподдерживаемом HTTP-методе " +
                 "возвращается `405 Method Not Allowed`");
 
-        // TODO Check: Сервер ОБЯЗАН сгенерировать поле заголовка Allow в ответе с кодом 405
-
+        String body = resp.body().trim();
+        assertEquals("""
+                        {"error":"Method Not Allowed","details":"Неподдерживаемый HTTP метод"}""", body,
+                "Ожидается описание ошибки");
     }
 
     @Test
