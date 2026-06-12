@@ -1,6 +1,7 @@
 package ru.practicum.moviehub.store;
 
 import ru.practicum.moviehub.exception.MovieException;
+import ru.practicum.moviehub.exception.MovieStoreMovieExistsException;
 import ru.practicum.moviehub.exception.MovieStoreNoSuchMovieException;
 import ru.practicum.moviehub.model.Movie;
 
@@ -14,11 +15,14 @@ public class MoviesStore {
         this.store = new HashMap<>();
     }
 
-    public void putMovie(Movie movie) {
-        store.put(getId(), movie);
+    public int putMovie(Movie movie) throws MovieStoreMovieExistsException {
+        // TODO implement check for MovieStoreMovieExistsException!!!
+        int id = getId();
+        store.put(id, movie);
+        return id;
     }
 
-    public void putMovie(String title, Integer year) throws MovieException {
+    public int putMovie(String title, Integer year) throws MovieException, MovieStoreMovieExistsException {
         putMovie(new Movie(title, year));
     }
 

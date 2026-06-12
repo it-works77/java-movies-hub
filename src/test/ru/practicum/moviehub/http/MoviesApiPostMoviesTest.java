@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.moviehub.exception.MovieException;
+import ru.practicum.moviehub.exception.MovieStoreMovieExistsException;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
 
@@ -163,14 +164,14 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        {"error":"Ошибка валидации запроса","year":"Неверный Json"}""", body,
+                        {"error":"Ошибка валидации запроса","details":"Неверный Json"}""", body,
                 "Ожидается описание ошибки");
     }
 
     private static HttpResponse<String> getResponseForPostMovieRequest(String route,
                                                                        String movieTitle,
                                                                        Integer movieYear)
-            throws IOException, InterruptedException, MovieException {
+            throws IOException, InterruptedException, MovieException, MovieStoreMovieExistsException {
         Movie movie = new Movie(movieTitle, movieYear);
         store.putMovie(movie);
 
