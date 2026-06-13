@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -50,9 +49,9 @@ public class MoviesApiHeadersTest {
     }
 
     /*  Общие:
+     *   - при неподдерживаемом HTTP-методе возвращается `405 Method Not Allowed`..
      *   - если был получен запрос с неправильным значением заголовка Content-Type:
      * Код статуса — 415 Unsupported Media Type.
-     *   - при неподдерживаемом HTTP-методе возвращается `405 Method Not Allowed`..
      */
     @Test
      void putMovies_returnMethodNotAllowed() throws Exception {
@@ -75,21 +74,7 @@ public class MoviesApiHeadersTest {
     }
 
     @Test
-    void getMovies_whenMissingContentType_returnUnsupportedMediaType() throws Exception {
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(SERVER_BASE_URL + "/movies"))
-                .GET()
-                .build();
-        HttpResponse<String> resp =
-                client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
-        checkResponseAcceptHeader(resp);
-        assertEquals(415, resp.statusCode(),
-                "запрос без заголовка Content-Type");
-    }
-
-    @Test
-    void getMovies_whenWrongContentType_returnUnsupportedMediaType() throws Exception {
+    void getMovies_whenGetHasContentType_returnsSuccess() throws Exception {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(SERVER_BASE_URL + "/movies"))
                 .setHeader("Content-Type", "application/xml")
@@ -98,9 +83,8 @@ public class MoviesApiHeadersTest {
         HttpResponse<String> resp =
                 client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-        checkResponseAcceptHeader(resp);
-        assertEquals(415, resp.statusCode(),
-                "запрос с неправильным значением заголовка Content-Type");
+        assertEquals(200, resp.statusCode(),
+                "/movies");
     }
 
     @Test
@@ -115,7 +99,7 @@ public class MoviesApiHeadersTest {
         HttpResponse<String> resp =
                 client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-        checkResponseAcceptHeader(resp);
+        checkResponseAcceptPostHeader(resp);
         assertEquals(415, resp.statusCode(),
                 "запрос без заголовка Content-Type");
     }
@@ -133,14 +117,14 @@ public class MoviesApiHeadersTest {
         HttpResponse<String> resp =
                 client.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
-        checkResponseAcceptHeader(resp);
+        checkResponseAcceptPostHeader(resp);
         assertEquals(415, resp.statusCode(),
                 "запрос с неправильным значением заголовка Content-Type");
     }
 
-    private static void checkResponseAcceptHeader(HttpResponse<String> resp) {
+    private static void checkResponseAcceptPostHeader(HttpResponse<String> resp) {
         String contentTypeHeaderValue =
-                resp.headers().firstValue("Accept").orElse("");
+                resp.headers().firstValue("Accept-Post").orElse("");
         assertEquals("application/json", contentTypeHeaderValue,
                 "Content-Type должен содержать формат данных и кодировку");
     }

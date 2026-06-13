@@ -59,13 +59,23 @@ public abstract class BaseHttpHandler implements HttpHandler {
         }
     }
 
-    protected void sendError(HttpExchange ex, Integer code, String error, String details) throws java.io.IOException {
-        // общий для всех хендлеров метод
-        // ошибки возвращают объект с полем `error` (и при необходимости `details`)
-        ex.getResponseHeaders().set("Content-Type", CT_JSON);
-        ex.sendResponseHeaders(code, 0);
+    protected void sendUnsupportedMediaType(HttpExchange ex) throws java.io.IOException {
+        // общий для всех POST хендлеров метод
+        // для отправки ответа с кодом 415
 
-        ErrorResponse errorResponse = new ErrorResponse(error, details);
+        /*
+            Заголовок Accept-Post (рекомендован): Этот заголовок, определённый в отдельной спецификации,
+            является самым правильным способом для сервера явно указать, какие медиатипы (MIME-типы)
+            он поддерживает в теле POST-запроса. Если сервер поддерживает POST запросы, возврат 415
+            в сочетании с Accept-Post даёт клиенту полную информацию для исправления запроса
+         */
+
+        ex.getResponseHeaders().set("Accept-Post", "application/json");
+        ex.getResponseHeaders().set("Content-Type", CT_JSON);
+        ex.sendResponseHeaders(415, 0);
+
+        ErrorResponse errorResponse = new ErrorResponse("Unsupported Media Type",
+                "Принимаем только application/json");
         Gson gson = new Gson();
         String errorResponseString = gson.toJson(errorResponse);
 
@@ -76,4 +86,23 @@ public abstract class BaseHttpHandler implements HttpHandler {
             e.printStackTrace();
         }
     }
-}
+
+        protected void sendError(HttpExchange ex, Integer code, String error, String details) throws
+        java.io.IOException {
+            // общий для всех хендлеров метод
+            // ошибки возвращают объект с полем `error` (и при необходимости `details`)
+            ex.getResponseHeaders().set("Content-Type", CT_JSON);
+            ex.sendResponseHeaders(code, 0);
+
+            ErrorResponse errorResponse = new ErrorResponse(error, details);
+            Gson gson = new Gson();
+            String errorResponseString = gson.toJson(errorResponse);
+
+            try (OutputStream os = ex.getResponseBody()) {
+                os.write(errorResponseString.getBytes());
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+                e.printStackTrace();
+            }
+        }
+    }

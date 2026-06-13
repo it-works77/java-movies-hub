@@ -34,11 +34,16 @@ public class MoviesHandler extends BaseHttpHandler {
 
         switch (method) {
             case "GET":
-                // sendJson(ex, 200, "[]");
                 handleGet(ex);
                 break;
             case "POST":
-                handlePost(ex);
+                if (ex.getRequestHeaders().containsKey("Content-Type")
+                        && ex.getRequestHeaders().get("Content-Type").contains("application/json")) {
+                    handlePost(ex);
+                } else {
+                    sendUnsupportedMediaType(ex);
+                    return;
+                }
                 break;
             case "DELETE":
                 handleDelete(ex);
@@ -145,7 +150,6 @@ public class MoviesHandler extends BaseHttpHandler {
 
         } catch (JsonSyntaxException e) {
             System.out.println(e.getMessage());
-            e.printStackTrace();
             sendError(ex, 422, "Ошибка валидации запроса", "Неверный Json");
 
         } catch (AbsentTitleException e) {
