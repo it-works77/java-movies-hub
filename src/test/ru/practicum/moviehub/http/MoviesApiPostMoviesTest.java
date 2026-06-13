@@ -120,8 +120,7 @@ public class MoviesApiPostMoviesTest {
                 "при при неверном `year` (меньше 1888)");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Ошибка валидации запроса","details":"Неверный год: year - не может быть меньше 1888"}""",
+        assertEquals("{\"error\":\"Ошибка валидации запроса\",\"details\":\"Неверный год: year - не может быть меньше 1888\"}",
                 body,
                 "Ожидается описание ошибки");
     }
