@@ -80,8 +80,7 @@ public class MoviesApiGetMoviesTest {
         assertEquals(200, resp.statusCode(), "GET /movies должен вернуть 200");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        [{"id":1,"title":"a","year":2000},{"id":2,"title":"b","year":2001}]""", body,
+        assertEquals("[{\"id\":1,\"title\":\"a\",\"year\":2000},{\"id\":2,\"title\":\"b\",\"year\":2001}]", body,
                 "Ожидается массив из двух фильмов");
     }
 
@@ -101,8 +100,7 @@ public class MoviesApiGetMoviesTest {
         assertEquals(200, resp.statusCode(), "GET /movies/{id} должен вернуть 200");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"id":1,"title":"a","year":2000}""", body,
+        assertEquals("{\"id\":1,\"title\":\"a\",\"year\":2000}", body,
                 "Ожидается объект фильма");
     }
 
@@ -115,8 +113,7 @@ public class MoviesApiGetMoviesTest {
                 "возвращает ошибку, если id не является числом");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Некорректный ID","details":"ID, указанный в пути запроса, не число"}""", body,
+        assertEquals("{\"error\":\"Некорректный ID\",\"details\":\"ID, указанный в пути запроса, не число\"}", body,
                 "Ожидается описание ошибки");
     }
 
@@ -128,8 +125,7 @@ public class MoviesApiGetMoviesTest {
         assertEquals(404, resp.statusCode(), "GET /movies/{id} должен вернуть 404 для неверного id");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Некорректный ID","details":"Фильм не найден"}""", body,
+        assertEquals("{\"error\":\"Некорректный ID\",\"details\":\"Фильм не найден\"}", body,
                 "Ожидается описание ошибки");
     }
 
@@ -151,8 +147,7 @@ public class MoviesApiGetMoviesTest {
         assertEquals(200, resp.statusCode(), "GET /movies?year=2001 должен вернуть 200");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        [{"id":2,"title":"b","year":2001},{"id":3,"title":"c","year":2001}]""", body,
+        assertEquals("[{\"id\":2,\"title\":\"b\",\"year\":2001},{\"id\":3,\"title\":\"c\",\"year\":2001}]", body,
                 "Ожидается массив из двух фильмов");
     }
 
@@ -177,8 +172,7 @@ public class MoviesApiGetMoviesTest {
                 "возвращает ошибку, если id не является числом");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Некорректный year","details":"Год, указанный в пути запроса, не является числом"}""", body,
+        assertEquals("{\"error\":\"Некорректный year\",\"details\":\"Год, указанный в пути запроса, не является числом\"}", body,
                 "Ожидается описание ошибки");
     }
 
