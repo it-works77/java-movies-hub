@@ -82,8 +82,7 @@ public class MoviesApiDeleteMoviesTest {
                 "возвращает ошибку, если фильм не найден");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Некорректный ID","details":"Фильм не найден"}""", body,
+        assertEquals("{\"error\":\"Некорректный ID\",\"details\":\"Фильм не найден\"}", body,
                 "Ожидается описание ошибки");
     }
 
@@ -97,8 +96,8 @@ public class MoviesApiDeleteMoviesTest {
                 "возвращает ошибку, если фильм не найден");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Некорректный ID","details":"ID, указанный в пути запроса, не число"}""", body,
+        assertEquals("{\"error\":\"Некорректный ID\",\"details\":\"ID, указанный в пути запроса, не число\"}",
+                body,
                 "Ожидается описание ошибки");
     }
 

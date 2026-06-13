@@ -71,17 +71,14 @@ public class MoviesApiPostMoviesTest {
         // TODO Implement body check
         // Тело — JSON созданного фильма с присвоенным ID.
         String body = resp.body().trim();
-        assertEquals("""
-                        {"id":1,"title":"a","year":2000}""", body,
+        assertEquals("{\"id\":1,\"title\":\"a\",\"year\":2000}", body,
                 "Ожидается добавленный в хранилище фильм с присвоенным id");
     }
 
     // - возвращает ошибку при пустом `title`;
     @Test
     void postMovie_whenEmptyTitle_returnsError() throws Exception {
-        String movieJsonString = """
-                {"title":"","year":2000}
-                """;
+        String movieJsonString = "{\"title\":\"\",\"year\":2000}\n";
 
         HttpResponse<String> resp = getResponseForPostMovieJsonRequest(ROUTE, movieJsonString);
 
@@ -89,8 +86,7 @@ public class MoviesApiPostMoviesTest {
         assertEquals(422, resp.statusCode(), "POST /movies возвращает ошибку 422 при пустом `title`");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Ошибка валидации запроса","details":"Неверное название: title — не пустая строка."}""",
+        assertEquals("{\"error\":\"Ошибка валидации запроса\",\"details\":\"Неверное название: title — не пустая строка.\"}",
                 body,
                 "Ожидается описание ошибки");
     }
@@ -98,9 +94,7 @@ public class MoviesApiPostMoviesTest {
     // - возвращает ошибку при слишком длинном `title` (> 100 символов);
     @Test
     void postMovie_whenWrongTitleLength_returnsError() throws Exception {
-        String movieJsonString = """
-                {"title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1", "year": 2000}
-                """;
+        String movieJsonString = "{\"title\": \"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa1\", \"year\": 2000}\n";
 
         HttpResponse<String> resp = getResponseForPostMovieJsonRequest(ROUTE, movieJsonString);
 
@@ -109,8 +103,7 @@ public class MoviesApiPostMoviesTest {
                 "при слишком длинном `title` (> 100 символов)`");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Ошибка валидации запроса","details":"Неверное название: title - длина ≤ 100 символов."}""",
+        assertEquals("{\"error\":\"Ошибка валидации запроса\",\"details\":\"Неверное название: title - длина ≤ 100 символов.\"}",
                 body,
                 "Ожидается описание ошибки");
     }
@@ -118,9 +111,7 @@ public class MoviesApiPostMoviesTest {
     //  - возвращает ошибку при неверном `year` (меньше 1888 или больше текущего года + 1);
     @Test
     void postMovie_whenYearTooEarly_returnsError() throws Exception {
-        String movieJsonString = """
-                {"title": "a", "year": 1887}
-                """;
+        String movieJsonString = "{\"title\": \"a\", \"year\": 1887}\n";
 
         HttpResponse<String> resp = getResponseForPostMovieJsonRequest(ROUTE, movieJsonString);
 
@@ -137,9 +128,7 @@ public class MoviesApiPostMoviesTest {
 
     @Test
     void postMovie_whenYearTooLate_returnsError() throws Exception {
-        String movieJsonString = """
-                {"title": "a", "year": 9999}
-                """;
+        String movieJsonString = "{\"title\": \"a\", \"year\": 9999}\n";
 
         HttpResponse<String> resp = getResponseForPostMovieJsonRequest(ROUTE, movieJsonString);
 
@@ -148,8 +137,7 @@ public class MoviesApiPostMoviesTest {
                 "при при неверном `year` (больше текущего года + 1)");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Ошибка валидации запроса","details":"Неверный год: year - не может быть больше, чем текущий год + 1"}""",
+        assertEquals("{\"error\":\"Ошибка валидации запроса\",\"details\":\"Неверный год: year - не может быть больше, чем текущий год + 1\"}",
                 body,
                 "Ожидается описание ошибки");
     }
@@ -166,17 +154,14 @@ public class MoviesApiPostMoviesTest {
 
         // Тело — JSON созданного фильма с присвоенным ID.
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Ошибка добавления фильма","details":"Такой фильм уже добавлен в хранилище"}""", body,
+        assertEquals("{\"error\":\"Ошибка добавления фильма\",\"details\":\"Такой фильм уже добавлен в хранилище\"}", body,
                 "Ожидается описание ошибки");
     }
 
     // - возвращает ошибку при некорректном JSON.
     @Test
     void postMovie_whenJsonIncorrect_returnsError() throws Exception {
-        String movieJsonString = """
-                not json
-                """;
+        String movieJsonString = "not json\n";
 
         HttpResponse<String> resp = getResponseForPostMovieJsonRequest(ROUTE, movieJsonString);
 
@@ -185,8 +170,7 @@ public class MoviesApiPostMoviesTest {
                 "при некорректном JSON.");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Ошибка валидации запроса","details":"Неверный Json"}""", body,
+        assertEquals("{\"error\":\"Ошибка валидации запроса\",\"details\":\"Неверный Json\"}", body,
                 "Ожидается описание ошибки");
     }
 
