@@ -61,8 +61,7 @@ public class MoviesApiHeadersTest {
                 "возвращается `405 Method Not Allowed`");
 
         String body = resp.body().trim();
-        assertEquals("""
-                        {"error":"Method Not Allowed","details":"Неподдерживаемый HTTP метод"}""", body,
+        assertEquals("{\"error\":\"Method Not Allowed\",\"details\":\"Неподдерживаемый HTTP метод\"}", body,
                 "Ожидается описание ошибки");
     }
 
