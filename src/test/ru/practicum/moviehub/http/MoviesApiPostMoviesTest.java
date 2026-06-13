@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.moviehub.exception.MovieException;
-import ru.practicum.moviehub.exception.MovieStoreMovieExistsException;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
 
@@ -19,7 +18,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.moviehub.MovieHubApp.SERVER_BASE_URL;
 import static ru.practicum.moviehub.http.MoviesServer.MOVIES_CONTEXT;
 
@@ -195,7 +193,7 @@ public class MoviesApiPostMoviesTest {
     private static HttpResponse<String> getResponseForPostMovieRequest(String route,
                                                                        String movieTitle,
                                                                        Integer movieYear)
-            throws IOException, InterruptedException, MovieException, MovieStoreMovieExistsException {
+            throws IOException, InterruptedException, MovieException {
         Movie movie = new Movie(movieTitle, movieYear);
 
         Gson gson = new Gson();
@@ -211,7 +209,7 @@ public class MoviesApiPostMoviesTest {
 
     private static HttpResponse<String> getResponseForPostMovieJsonRequest(String route,
                                                                            String movieJsonString)
-            throws IOException, InterruptedException, MovieException {
+            throws IOException, InterruptedException {
         HttpRequest req = HttpRequest.newBuilder()
                 .uri(URI.create(SERVER_BASE_URL + route))
                 .header("Content-Type", "application/json")

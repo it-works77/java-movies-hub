@@ -3,7 +3,6 @@ package ru.practicum.moviehub.http;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
@@ -16,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static ru.practicum.moviehub.MovieHubApp.SERVER_BASE_URL;
 
 public class MoviesApiHeadersTest {
@@ -34,11 +32,6 @@ public class MoviesApiHeadersTest {
         client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(CONNECTION_TIMEOUT))
                 .build();
-    }
-
-    @BeforeEach
-    void beforeEach() {
-
     }
 
     @AfterAll

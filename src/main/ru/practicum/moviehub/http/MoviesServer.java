@@ -12,7 +12,7 @@ import java.util.List;
 public class MoviesServer {
     private final MoviesStore moviesStore;
     private final String serverBaseUrl;
-    private HttpServer server;
+    private final HttpServer server;
 
     public static final String MOVIES_CONTEXT = "/movies";
     public static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "DELETE");
