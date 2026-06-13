@@ -3,7 +3,7 @@ package ru.practicum.moviehub.http;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import ru.practicum.moviehub.dto.response.ErrorResponse;
+import ru.practicum.moviehub.api.response.ErrorResponse;
 
 import java.io.IOException;
 import java.io.OutputStream;

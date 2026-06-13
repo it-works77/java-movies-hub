@@ -1,4 +1,4 @@
-package ru.practicum.moviehub.dto.response;
+package ru.practicum.moviehub.api.response;
 
 public class MovieResponse {
     private final int id;

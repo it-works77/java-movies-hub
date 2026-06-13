@@ -16,14 +16,14 @@ public class MoviesStore {
     }
 
     public int putMovie(Movie movie) throws MovieStoreMovieExistsException {
-        // TODO implement check for MovieStoreMovieExistsException!!!
         int id = getId();
-        store.put(id, movie);
-        return id;
-    }
-
-    public int putMovie(String title, Integer year) throws MovieException, MovieStoreMovieExistsException {
-        putMovie(new Movie(title, year));
+        if (store.containsValue(movie)) {
+            throw new MovieStoreMovieExistsException("Фильм %s, снятый в %d уже есть в хранилище"
+                    .formatted(movie.getTitle(), movie.getYear()));
+        } else {
+            store.put(id, movie);
+            return id;
+        }
     }
 
     public Optional<Movie> getMovie(Integer id) {

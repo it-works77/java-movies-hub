@@ -1,7 +1,6 @@
 package ru.practicum.moviehub.model;
 
 import com.google.gson.Gson;
-import ru.practicum.moviehub.dto.response.MovieResponse;
 import ru.practicum.moviehub.exception.*;
 
 import java.time.Year;

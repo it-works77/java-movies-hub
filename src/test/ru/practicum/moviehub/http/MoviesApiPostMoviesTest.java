@@ -66,13 +66,16 @@ public class MoviesApiPostMoviesTest {
     // - добавляет фильм при корректных данных;
     @Test
     void postMovie_whenCorrect_returnsAddedMovie() throws Exception {
-
-        HttpResponse<String> resp = getResponseForPostMovieRequest(ROUTE, "A", 2000);
+        HttpResponse<String> resp = getResponseForPostMovieRequest(ROUTE, "a", 2000);
 
         checkResponseContentTypeHeader(resp);
         assertEquals(201, resp.statusCode(), "POST /movies должен вернуть 201");
         // TODO Implement body check
         // Тело — JSON созданного фильма с присвоенным ID.
+        String body = resp.body().trim();
+        assertEquals("""
+                        {"id":1,"title":"a","year":2000}""", body,
+                "Ожидается добавленный в хранилище фильм с присвоенным id");
     }
 
     // - возвращает ошибку при пустом `title`;
@@ -89,7 +92,8 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        {"error":"Неверный title","year":"Пустой заголовок"}""", body,
+                        {"error":"Ошибка валидации запроса","details":"Неверное название: title — не пустая строка."}""",
+                body,
                 "Ожидается описание ошибки");
     }
 
@@ -108,7 +112,8 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        {"error":"Неверный title","year":"title > 100 символов"}""", body,
+                        {"error":"Ошибка валидации запроса","details":"Неверное название: title - длина ≤ 100 символов."}""",
+                body,
                 "Ожидается описание ошибки");
     }
 
@@ -127,7 +132,8 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        {"error":"Неверный year","year":"Год меньше 1888"}""", body,
+                        {"error":"Ошибка валидации запроса","details":"Неверные год: year - не может быть меньше 1888"}""",
+                body,
                 "Ожидается описание ошибки");
     }
 
@@ -145,7 +151,25 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        {"error":"Неверный year","year":"больше текущего года + 1"}""", body,
+                        {"error":"Ошибка валидации запроса","details":"Неверный год: year - не может быть больше, чем текущий год + 1"}""",
+                body,
+                "Ожидается описание ошибки");
+    }
+
+    @Test
+    void postMovie_whenAlreadyExistsInStore_returnsError() throws Exception {
+
+        store.putMovie(new Movie("a", 2000));
+        HttpResponse<String> resp = getResponseForPostMovieRequest(ROUTE, "a", 2000);
+
+        checkResponseContentTypeHeader(resp);
+        assertEquals(422, resp.statusCode(), "POST /movies возвращает ошибку 422 " +
+                ", если фильм уже добавлен в хранилище.");
+
+        // Тело — JSON созданного фильма с присвоенным ID.
+        String body = resp.body().trim();
+        assertEquals("""
+                        {"error":"Ошибка добавления фильма","details":"Такой фильм уже добавлен в хранилище"}""", body,
                 "Ожидается описание ошибки");
     }
 
@@ -173,7 +197,6 @@ public class MoviesApiPostMoviesTest {
                                                                        Integer movieYear)
             throws IOException, InterruptedException, MovieException, MovieStoreMovieExistsException {
         Movie movie = new Movie(movieTitle, movieYear);
-        store.putMovie(movie);
 
         Gson gson = new Gson();
         String movieJsonString = gson.toJson(movie);

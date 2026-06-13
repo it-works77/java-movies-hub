@@ -1,11 +1,9 @@
 package ru.practicum.moviehub.http;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
-import ru.practicum.moviehub.dto.response.MovieResponse;
+import ru.practicum.moviehub.api.response.MovieResponse;
 import ru.practicum.moviehub.exception.*;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.store.MoviesStore;
@@ -96,7 +94,7 @@ public class MoviesHandler extends BaseHttpHandler {
 
         } catch (WrongYearException e) {
             System.out.println(e.getMessage());
-            sendError(ex, 422, "Ошибка валидации запроса", "Неверные год: %s"
+            sendError(ex, 422, "Ошибка валидации запроса", "Неверный год: %s"
                     .formatted(e.getMessage()));
 
         } catch (MovieException e) {
@@ -106,7 +104,7 @@ public class MoviesHandler extends BaseHttpHandler {
 
         } catch (MovieStoreMovieExistsException e) {
             System.out.println("Некорректный title. Фильм уже добавлен");
-            sendError(ex, 404, "Некорректный title", "Фильм уже добавлен");
+            sendError(ex, 422, "Ошибка добавления фильма", "Такой фильм уже добавлен в хранилище");
         }
     }
 
