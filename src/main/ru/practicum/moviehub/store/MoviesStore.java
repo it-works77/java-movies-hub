@@ -1,12 +1,11 @@
 package ru.practicum.moviehub.store;
 
-import ru.practicum.moviehub.exception.MovieException;
 import ru.practicum.moviehub.exception.MovieStoreMovieExistsException;
 import ru.practicum.moviehub.exception.MovieStoreNoSuchMovieException;
 import ru.practicum.moviehub.model.Movie;
 
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MoviesStore {
     private final HashMap<Integer, Movie> store;
@@ -47,5 +46,19 @@ public class MoviesStore {
 
     public void clear() {
         store.clear();
+    }
+
+    public ArrayList<Movie> getAllMovies() {
+        return new ArrayList<>(store.values());
+    }
+
+    public Map<Integer, Movie> get() {
+        return store;
+    }
+
+    public Map<Integer, Movie> getMoviesByYear(Integer year) {
+        return store.entrySet().stream()
+                .filter(movieEntry -> Objects.equals(movieEntry.getValue().getYear(), year))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

@@ -58,7 +58,6 @@ public class MoviesApiGetMoviesTest {
      */
     @Test
     void getMovies_whenEmpty_returnsEmptyArray() throws Exception {
-
         HttpResponse<String> resp = getResponseForGetRequest("/movies");
 
         checkResponseContentTypeHeader(resp);
@@ -66,7 +65,7 @@ public class MoviesApiGetMoviesTest {
 
         String body = resp.body().trim();
         assertTrue(body.startsWith("[") && body.endsWith("]"),
-                "Ожидается JSON-массив");
+                "Ожидается пустой JSON-массив");
     }
 
     @Test
@@ -103,10 +102,8 @@ public class MoviesApiGetMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        [{"id":1,"title":"a","year":2000}]""", body,
-                "Ожидается массив из одного фильма");
-
-        // TODO Implement body check
+                        {"id":1,"title":"a","year":2000}""", body,
+                "Ожидается объект фильма");
     }
 
     @Test
@@ -114,8 +111,8 @@ public class MoviesApiGetMoviesTest {
         HttpResponse<String> resp = getResponseForGetRequest(ROUTE + "/asdf");
 
         checkResponseContentTypeHeader(resp);
-        assertEquals(400, resp.statusCode(), "DELETE /movies/{id} " +
-                "возвращает ошибку, если фильм не найден");
+        assertEquals(400, resp.statusCode(), "GET /movies/{id} " +
+                "возвращает ошибку, если id не является числом");
 
         String body = resp.body().trim();
         assertEquals("""
@@ -141,6 +138,51 @@ public class MoviesApiGetMoviesTest {
      *  - возвращает пустой список, если фильмов с таким годом нет;
      *  - возвращает ошибку, если параметр `year` не число.
      */
+    @Test
+    void getMovies_whenHaveMoviesWithSuchYear_returnsMovies() throws Exception {
+
+        store.putMovie(new Movie("a", 2000));
+        store.putMovie(new Movie("b", 2001));
+        store.putMovie(new Movie("c", 2001));
+
+        HttpResponse<String> resp = getResponseForGetRequest("/movies?year=2001");
+
+        checkResponseContentTypeHeader(resp);
+        assertEquals(200, resp.statusCode(), "GET /movies?year=2001 должен вернуть 200");
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        [{"id":2,"title":"b","year":2001},{"id":3,"title":"c","year":2001}]""", body,
+                "Ожидается массив из двух фильмов");
+    }
+
+    @Test
+    void getMoviesByYear_whenEmpty_returnsEmptyArray() throws IOException, InterruptedException {
+        HttpResponse<String> resp = getResponseForGetRequest("/movies?year=9999");
+
+        checkResponseContentTypeHeader(resp);
+        assertEquals(200, resp.statusCode(), "GET /movies?year=9999 должен вернуть 200");
+
+        String body = resp.body().trim();
+        assertTrue(body.startsWith("[") && body.endsWith("]"),
+                "Ожидается пустой JSON-массив");
+    }
+
+    @Test
+    void getMoviesByYear_whenYearNotNumber_returnsError() throws IOException, InterruptedException {
+        HttpResponse<String> resp = getResponseForGetRequest("/movies?year=asdf");
+
+        checkResponseContentTypeHeader(resp);
+        assertEquals(400, resp.statusCode(), "GET /movies?year=9999 " +
+                "возвращает ошибку, если id не является числом");
+
+        String body = resp.body().trim();
+        assertEquals("""
+                        {"error":"Некорректный year","details":"Год, указанный в пути запроса, не является числом"}""", body,
+                "Ожидается описание ошибки");
+    }
+
+
 
     private static HttpResponse<String> getResponseForGetRequest(String s) throws IOException, InterruptedException {
         HttpRequest req = HttpRequest.newBuilder()

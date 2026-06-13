@@ -132,7 +132,7 @@ public class MoviesApiPostMoviesTest {
 
         String body = resp.body().trim();
         assertEquals("""
-                        {"error":"Ошибка валидации запроса","details":"Неверные год: year - не может быть меньше 1888"}""",
+                        {"error":"Ошибка валидации запроса","details":"Неверный год: year - не может быть меньше 1888"}""",
                 body,
                 "Ожидается описание ошибки");
     }
@@ -177,7 +177,7 @@ public class MoviesApiPostMoviesTest {
     @Test
     void postMovie_whenJsonIncorrect_returnsError() throws Exception {
         String movieJsonString = """
-                {"title": "a", year": 1999}
+                not json
                 """;
 
         HttpResponse<String> resp = getResponseForPostMovieJsonRequest(ROUTE, movieJsonString);

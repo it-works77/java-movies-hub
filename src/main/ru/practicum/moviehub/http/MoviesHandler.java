@@ -11,6 +11,7 @@ import ru.practicum.moviehub.store.MoviesStore;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import static ru.practicum.moviehub.http.MoviesServer.ALLOWED_METHODS;
 
@@ -33,7 +34,8 @@ public class MoviesHandler extends BaseHttpHandler {
 
         switch (method) {
             case "GET":
-                sendJson(ex, 200, "[]");
+                // sendJson(ex, 200, "[]");
+                handleGet(ex);
                 break;
             case "POST":
                 handlePost(ex);
@@ -46,12 +48,79 @@ public class MoviesHandler extends BaseHttpHandler {
         }
     }
 
+    private void handleGet(HttpExchange ex) throws IOException {
+        String[] pathParts = getPathParts(ex);
+        HashMap<String, String> queryParams = getQueryParams(ex);
+
+        if (pathParts.length > 3) {
+            sendError(ex, 400, "Неверный запрос", "Неверный путь или параметры запроса");
+        }
+
+        if (pathParts.length == 2) {
+            if (queryParams.isEmpty()) {
+                // GET /movies - Получение всех фильмов
+                Map<Integer, Movie> movies = moviesStore.get();
+                String movieResponsesJsonString = getJsonStringFromList(getMoviesResponses(movies));
+                sendJson(ex, 200, movieResponsesJsonString);
+            } else if (queryParams.containsKey("year")) {
+                // GET /movies?year=YYYY - Получение фильмов по году
+
+                int year;
+                try {
+                    year = Integer.parseInt(queryParams.get("year"));
+                } catch (NumberFormatException e) {
+                    sendError(ex, 400,
+                            "Некорректный year", "Год, указанный в пути запроса, не является числом");
+                    return;
+                }
+
+                Map<Integer, Movie> movies = moviesStore.getMoviesByYear(year);
+                String movieResponsesJsonString = getJsonStringFromList(getMoviesResponses(movies));
+                sendJson(ex, 200, movieResponsesJsonString);
+            }
+        } else if (pathParts.length == 3) {
+            // GET /movies/{id} - получение фильма по Id
+            try {
+                int id = Integer.parseInt(pathParts[2]);
+                Optional<Movie> movieOpt = moviesStore.getMovie(id);
+                if (movieOpt.isEmpty()) {
+                    sendError(ex, 404, "Некорректный ID", "Фильм не найден");
+                } else {
+                    Movie movie = movieOpt.get();
+                    MovieResponse movieResponse = new MovieResponse(id, movie.getTitle(), movie.getYear());
+
+                    Gson gson = new Gson();
+                    String movieResponseString = gson.toJson(movieResponse);
+                    sendJson(ex, 200, movieResponseString);
+                }
+            } catch (NumberFormatException e) {
+                sendError(ex, 400, "Некорректный ID", "ID, указанный в пути запроса, не число");
+            }
+        } else {
+            // Неверный запрос
+            sendError(ex, 400, "Неверный запрос", "Неверный путь или параметры запроса");
+        }
+    }
+
+    private String getJsonStringFromList(List<?> entriesList) {
+        Gson gson = new Gson();
+        return gson.toJson(entriesList);
+    }
+
+    private List<MovieResponse> getMoviesResponses(Map<Integer, Movie> movies) {
+            return movies.entrySet().stream()
+                    .map(entry -> new MovieResponse(entry.getKey(),
+                            entry.getValue().getTitle(),
+                            entry.getValue().getYear())
+                    )
+                    .toList();
+    }
+
     private void handlePost(HttpExchange ex) throws IOException {
-        String path = ex.getRequestURI().getPath();
-        String[] pathParts = path.split("/");
+        String[] pathParts = getPathParts(ex);
 
         if (pathParts.length != 2) {
-            sendError(ex, 400, "Неверный путь запроса", "Path: %s".formatted(path));
+            sendError(ex, 400, "Неверный запрос", "Неверный путь или параметры запроса");
         }
 
         String body;
@@ -109,11 +178,10 @@ public class MoviesHandler extends BaseHttpHandler {
     }
 
     private void handleDelete(HttpExchange ex) throws IOException {
-        String path = ex.getRequestURI().getPath();
-        String[] pathParts = path.split("/");
+        String[] pathParts = getPathParts(ex);
 
         if (pathParts.length != 3) {
-            sendError(ex, 400, "Неверный путь запроса", "Path: %s".formatted(path));
+            sendError(ex, 400, "Неверный запрос", "Неверный путь или параметры запроса");
         }
 
         try {
@@ -126,4 +194,33 @@ public class MoviesHandler extends BaseHttpHandler {
             sendError(ex, 404, "Некорректный ID", "Фильм не найден");
         }
     }
+
+    private String[] getPathParts(HttpExchange ex) {
+        String path = ex.getRequestURI().getPath();
+        return path.split("/");
+    }
+
+    private HashMap<String, String> getQueryParams(HttpExchange ex) {
+        String queryParamsString = ex.getRequestURI().getQuery();
+
+        HashMap<String, String> result = new HashMap<>();
+        if (queryParamsString == null) {
+            return result;
+        }
+
+        String[] paramsEntries = queryParamsString.split("&");
+
+        for (String s: paramsEntries) {
+            String[] paramEntry = queryParamsString.split("=");
+            if (paramEntry.length == 2) {
+                if (!(paramEntry[0].isBlank() && paramEntry[1].isBlank())) {
+                    result.put(paramEntry[0], paramEntry[1]);
+                } else {
+                    System.out.printf("Skipping param %s%n", s);
+                }
+            }
+        }
+        return result;
+    }
+
 }
