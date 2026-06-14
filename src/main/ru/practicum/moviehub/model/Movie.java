@@ -19,7 +19,7 @@ public class Movie {
         validate();
     }
 
-    public Movie(Movie movie){
+    public Movie(Movie movie) {
         title = movie.getTitle();
         year = movie.getYear();
     }
