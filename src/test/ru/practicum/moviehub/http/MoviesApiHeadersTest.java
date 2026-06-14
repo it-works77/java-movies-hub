@@ -22,6 +22,7 @@ public class MoviesApiHeadersTest {
     private static HttpClient client;
     private static MoviesStore store;
 
+    private static final Gson gson = new Gson();
     private static final int CONNECTION_TIMEOUT = 5;
 
     @BeforeAll
@@ -81,7 +82,6 @@ public class MoviesApiHeadersTest {
 
     @Test
     void postMovies_whenMissingContentType_returnUnsupportedMediaType() throws Exception {
-        Gson gson = new Gson();
         String movieJsonString = gson.toJson(new Movie("A", 2000));
 
         HttpRequest req = HttpRequest.newBuilder()
@@ -98,7 +98,6 @@ public class MoviesApiHeadersTest {
 
     @Test
     void postMovies_whenWrongContentType_returnUnsupportedMediaType() throws Exception {
-        Gson gson = new Gson();
         String movieJsonString = gson.toJson(new Movie("A", 2000));
 
         HttpRequest req = HttpRequest.newBuilder()

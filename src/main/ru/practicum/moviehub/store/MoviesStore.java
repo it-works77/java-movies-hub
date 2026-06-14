@@ -48,17 +48,17 @@ public class MoviesStore {
         store.clear();
     }
 
-    public ArrayList<Movie> getAllMovies() {
-        return new ArrayList<>(store.values());
-    }
-
     public Map<Integer, Movie> get() {
-        return store;
+        return store.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        (entry) -> new Movie(entry.getValue()))
+                );
     }
 
     public Map<Integer, Movie> getMoviesByYear(Integer year) {
         return store.entrySet().stream()
                 .filter(movieEntry -> Objects.equals(movieEntry.getValue().getYear(), year))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        (entry) -> new Movie(entry.getValue())));
     }
 }

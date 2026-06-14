@@ -28,7 +28,7 @@ public class MoviesApiPostMoviesTest {
 
     private static final int CONNECTION_TIMEOUT = 5;
     private static final String ROUTE = MOVIES_CONTEXT;
-
+    private static final Gson gson = new Gson();
 
     @BeforeAll
     static void beforeAll() {
@@ -179,7 +179,6 @@ public class MoviesApiPostMoviesTest {
             throws IOException, InterruptedException, MovieException {
         Movie movie = new Movie(movieTitle, movieYear);
 
-        Gson gson = new Gson();
         String movieJsonString = gson.toJson(movie);
 
         HttpRequest req = HttpRequest.newBuilder()

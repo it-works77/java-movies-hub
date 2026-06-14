@@ -1,6 +1,5 @@
 package ru.practicum.moviehub.http;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.HttpExchange;
 import ru.practicum.moviehub.api.response.MovieResponse;
@@ -27,29 +26,38 @@ public class MoviesHandler extends BaseHttpHandler {
     public void handle(HttpExchange ex) throws IOException {
         String method = ex.getRequestMethod().toUpperCase();
 
-        if (!ALLOWED_METHODS.contains(method)) {
-            sendMethodNotAllowed(ex);
-            return;
-        }
+        try {
+            if (!ALLOWED_METHODS.contains(method)) {
+                sendMethodNotAllowed(ex);
+                return;
+            }
 
-        switch (method) {
-            case "GET":
-                handleGet(ex);
-                break;
-            case "POST":
-                if (ex.getRequestHeaders().containsKey("Content-Type")
-                        && ex.getRequestHeaders().get("Content-Type").contains("application/json")) {
-                    handlePost(ex);
-                } else {
-                    sendUnsupportedMediaType(ex);
-                    return;
-                }
-                break;
-            case "DELETE":
-                handleDelete(ex);
-                break;
-            default:
-                sendError(ex, 500, "No handler", "It's not handled at all");
+            switch (method) {
+                case "GET":
+                    handleGet(ex);
+                    break;
+                case "POST":
+                    if (ex.getRequestHeaders().containsKey("Content-Type")
+                            && ex.getRequestHeaders().get("Content-Type").contains("application/json")) {
+                        handlePost(ex);
+                    } else {
+                        sendUnsupportedMediaType(ex);
+                        return;
+                    }
+                    break;
+                case "DELETE":
+                    handleDelete(ex);
+                    break;
+                default:
+                    sendError(ex, 501, "No handler", "It's not handled at all");
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+            sendError(ex, 500, "Internal Server Error", """
+                    Сервер столкнулся с неожиданной ошибкой, которая помешала ему выполнить запрос.
+                    Этот код является обобщённым ответом на перехват всех исключений, которые не были обработаны.
+                    """);
         }
     }
 
@@ -94,7 +102,6 @@ public class MoviesHandler extends BaseHttpHandler {
                     Movie movie = movieOpt.get();
                     MovieResponse movieResponse = new MovieResponse(id, movie.getTitle(), movie.getYear());
 
-                    Gson gson = new Gson();
                     String movieResponseString = gson.toJson(movieResponse);
                     sendJson(ex, 200, movieResponseString);
                 }
@@ -108,7 +115,6 @@ public class MoviesHandler extends BaseHttpHandler {
     }
 
     private String getJsonStringFromList(List<?> entriesList) {
-        Gson gson = new Gson();
         return gson.toJson(entriesList);
     }
 
@@ -144,7 +150,6 @@ public class MoviesHandler extends BaseHttpHandler {
             int id = moviesStore.putMovie(movie);
             MovieResponse movieResponse = new MovieResponse(id, movie.getTitle(), movie.getYear());
 
-            Gson gson = new Gson();
             String movieResponseString = gson.toJson(movieResponse);
             sendJson(ex, 201, movieResponseString);
 

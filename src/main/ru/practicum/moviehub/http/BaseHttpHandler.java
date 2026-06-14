@@ -11,6 +11,11 @@ import java.nio.charset.StandardCharsets;
 
 public abstract class BaseHttpHandler implements HttpHandler {
     protected static final String CT_JSON = "application/json; charset=UTF-8"; // !!! Укажите содержимое заголовка Content-Type
+    protected final Gson gson;
+
+    public BaseHttpHandler() {
+        this.gson = new Gson();
+    }
 
     protected void sendJson(HttpExchange ex, int status, String json) throws IOException {
         // общий для всех хендлеров метод
@@ -28,14 +33,14 @@ public abstract class BaseHttpHandler implements HttpHandler {
 
     }
 
-    protected void sendNoContent(HttpExchange ex) throws java.io.IOException {
+    protected void sendNoContent(HttpExchange ex) throws IOException {
         // общий для всех хендлеров метод
         // для отправки ответа без тела и кодом 204
         ex.getResponseHeaders().set("Content-Type", CT_JSON);
         ex.sendResponseHeaders(204, -1);
     }
 
-    protected void sendMethodNotAllowed(HttpExchange ex) throws java.io.IOException {
+    protected void sendMethodNotAllowed(HttpExchange ex) throws IOException {
         // общий для всех хендлеров метод
         // для отправки ответа без тела и кодом 405
 
@@ -48,7 +53,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
 
         ErrorResponse errorResponse = new ErrorResponse("Method Not Allowed",
                 "Неподдерживаемый HTTP метод");
-        Gson gson = new Gson();
+
         String errorResponseString = gson.toJson(errorResponse);
 
         try (OutputStream os = ex.getResponseBody()) {
@@ -59,7 +64,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
         }
     }
 
-    protected void sendUnsupportedMediaType(HttpExchange ex) throws java.io.IOException {
+    protected void sendUnsupportedMediaType(HttpExchange ex) throws IOException {
         // общий для всех POST хендлеров метод
         // для отправки ответа с кодом 415
 
@@ -76,7 +81,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
 
         ErrorResponse errorResponse = new ErrorResponse("Unsupported Media Type",
                 "Принимаем только application/json");
-        Gson gson = new Gson();
+
         String errorResponseString = gson.toJson(errorResponse);
 
         try (OutputStream os = ex.getResponseBody()) {
@@ -88,14 +93,14 @@ public abstract class BaseHttpHandler implements HttpHandler {
     }
 
         protected void sendError(HttpExchange ex, Integer code, String error, String details) throws
-        java.io.IOException {
+        IOException {
             // общий для всех хендлеров метод
             // ошибки возвращают объект с полем `error` (и при необходимости `details`)
             ex.getResponseHeaders().set("Content-Type", CT_JSON);
             ex.sendResponseHeaders(code, 0);
 
             ErrorResponse errorResponse = new ErrorResponse(error, details);
-            Gson gson = new Gson();
+
             String errorResponseString = gson.toJson(errorResponse);
 
             try (OutputStream os = ex.getResponseBody()) {

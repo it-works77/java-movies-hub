@@ -8,6 +8,10 @@ import java.time.Year;
 public class Movie {
     private final String title;
     private final Integer year;
+    private static final Gson gson = new Gson();
+
+    private static final Integer MAX_TITLE_LENGTH = 100;
+    private static final Integer MIN_YEAR_VALUE = 1888;
 
     public Movie(String title, Integer year) throws MovieException {
         this.title = title;
@@ -15,8 +19,12 @@ public class Movie {
         validate();
     }
 
+    public Movie(Movie movie){
+        title = movie.getTitle();
+        year = movie.getYear();
+    }
+
     public static Movie fromJson(String movieJson) throws MovieException {
-        Gson gson = new Gson();
         Movie movie = gson.fromJson(movieJson, Movie.class);
         movie.validate();
         return movie;
@@ -35,12 +43,12 @@ public class Movie {
             throw new AbsentTitleException("title — не может быть null.");
         } else if (title.isBlank()) {
             throw new WrongTitleException("title — не пустая строка.");
-        } else if (title.length() > 100) {
-            throw new WrongTitleException("title - длина ≤ 100 символов.");
+        } else if (title.length() > MAX_TITLE_LENGTH) {
+            throw new WrongTitleException("title - длина ≤ %d символов.".formatted(MAX_TITLE_LENGTH));
         } else if (year == null) {
             throw new AbsentYearException("year — не может быть null.");
-        } else if (year < 1888) {
-            throw new WrongYearException("year - не может быть меньше 1888");
+        } else if (year < MIN_YEAR_VALUE) {
+            throw new WrongYearException("year - не может быть меньше %d".formatted(MIN_YEAR_VALUE));
         } else if (year > (Year.now().getValue() + 1)) {
             throw new WrongYearException("year - не может быть больше, чем текущий год + 1");
         }
